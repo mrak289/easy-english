@@ -1,9 +1,11 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 
 export default function Header({ subtitle, showBack = false }) {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { lang, toggleLang, t } = useLanguage();
 
   return (
     <header className="bg-white border-b border-slate-200 py-4 px-6 sticky top-0 z-10 shadow-sm">
@@ -16,8 +18,8 @@ export default function Header({ subtitle, showBack = false }) {
             <i className="fa-solid fa-graduation-cap text-lg"></i>
           </div>
           <div>
-            <h1 className="font-bold text-lg text-slate-900 tracking-tight">Easy English</h1>
-            <p className="text-xs text-slate-500 font-medium">Interactive Learning Hub</p>
+            <h1 className="font-bold text-lg text-slate-900 tracking-tight">{t.brandName}</h1>
+            <p className="text-xs text-slate-500 font-medium">{t.brandTagline}</p>
           </div>
         </div>
 
@@ -34,9 +36,17 @@ export default function Header({ subtitle, showBack = false }) {
               className="text-sm text-slate-500 hover:text-slate-800 font-semibold flex items-center space-x-1"
             >
               <i className="fa-solid fa-chevron-left text-xs"></i>
-              <span>Back</span>
+              <span>{t.back}</span>
             </button>
           )}
+
+          <button
+            onClick={toggleLang}
+            className="text-xs font-bold px-2.5 py-1.5 rounded-lg border border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-600 transition-all"
+            title="Switch language / Змінити мову"
+          >
+            {lang === 'en' ? '🇺🇦 UA' : '🇬🇧 EN'}
+          </button>
 
           {user === undefined ? null : user ? (
             <div className="flex items-center space-x-2">
@@ -52,7 +62,7 @@ export default function Header({ subtitle, showBack = false }) {
                 onClick={logout}
                 className="text-xs text-slate-400 hover:text-slate-600 font-medium ml-1"
               >
-                Вийти
+                {t.signOut}
               </button>
             </div>
           ) : (
@@ -65,7 +75,7 @@ export default function Header({ subtitle, showBack = false }) {
                 alt="Google"
                 className="w-4 h-4"
               />
-              <span>Увійти</span>
+              <span>{t.signIn}</span>
             </a>
           )}
         </div>

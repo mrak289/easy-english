@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useLanguage } from '../../../contexts/LanguageContext';
 
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || "";
 
@@ -7,6 +8,7 @@ export default function ResultsScreen({ text, userRecall, onRetry, onBackToCatal
   const [aiFeedback, setAiFeedback] = useState(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState(null);
+  const { t } = useLanguage();
 
   const getAIFeedback = async () => {
     setAiLoading(true);
@@ -43,7 +45,7 @@ export default function ResultsScreen({ text, userRecall, onRetry, onBackToCatal
       delay *= 2;
     }
 
-    setAiError("Could not connect to AI teacher. Please check your internet connection or API key.");
+    setAiError(t.aiConnectError);
     setAiLoading(false);
   };
 
@@ -55,20 +57,20 @@ export default function ResultsScreen({ text, userRecall, onRetry, onBackToCatal
           <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-6">
             <h2 className="text-xl font-bold text-slate-900 flex items-center space-x-2">
               <i className="fa-solid fa-code-compare text-indigo-600"></i>
-              <span>Results Comparison</span>
+              <span>{t.resultsComparison}</span>
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="p-4 rounded-xl bg-indigo-50/50 border border-indigo-100">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-700 bg-indigo-100 px-2 py-1 rounded">
-                  Your Active Recall Text
+                  {t.yourActiveRecall}
                 </span>
                 <p className="text-slate-800 text-sm mt-3 leading-relaxed italic">"{userRecall}"</p>
               </div>
 
               <div className="p-4 rounded-xl bg-amber-50/50 border border-amber-100">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700 bg-amber-100 px-2 py-1 rounded">
-                  Original Highlights
+                  {t.originalHighlights}
                 </span>
                 <div className="text-xs text-slate-700 mt-3 space-y-2 leading-relaxed">
                   {text.highlights.map((h, i) => (
@@ -79,7 +81,7 @@ export default function ResultsScreen({ text, userRecall, onRetry, onBackToCatal
             </div>
 
             <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl">
-              <h4 className="font-bold text-xs text-slate-700 uppercase tracking-wide mb-2">🔍 Self-Assessment Checklist:</h4>
+              <h4 className="font-bold text-xs text-slate-700 uppercase tracking-wide mb-2">{t.selfAssessment}</h4>
               <ul className="text-xs text-slate-600 space-y-1 list-disc list-inside">
                 {text.checklist.map((item, i) => (
                   <li key={i}>{item}</li>
@@ -98,23 +100,23 @@ export default function ResultsScreen({ text, userRecall, onRetry, onBackToCatal
                 <i className="fa-solid fa-wand-magic-sparkles text-lg"></i>
               </div>
               <div>
-                <h3 className="font-bold text-base">Gemini AI Teacher Analysis</h3>
-                <p className="text-xs text-indigo-300">Get an automated grade, grammar review and suggestions!</p>
+                <h3 className="font-bold text-base">{t.aiTeacherTitle}</h3>
+                <p className="text-xs text-indigo-300">{t.aiTeacherSubtitle}</p>
               </div>
             </div>
 
             {aiLoading && (
               <div className="flex flex-col items-center py-6">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mb-2"></div>
-                <span className="text-xs text-indigo-200">Gemini is carefully checking your English...</span>
+                <span className="text-xs text-indigo-200">{t.aiChecking}</span>
               </div>
             )}
 
             {!aiLoading && !aiFeedback && !aiError && (
               <>
-                <p className="text-sm text-indigo-200 mb-4">Click the button below to get professional feedback from your personal AI teacher.</p>
+                <p className="text-sm text-indigo-200 mb-4">{t.aiClickBelow}</p>
                 {!GEMINI_API_KEY && (
-                  <p className="text-xs text-amber-300 mb-3">⚠️ Set VITE_GEMINI_API_KEY in .env to enable AI feedback.</p>
+                  <p className="text-xs text-amber-300 mb-3">{t.aiKeyWarning}</p>
                 )}
                 <button
                   onClick={getAIFeedback}
@@ -122,7 +124,7 @@ export default function ResultsScreen({ text, userRecall, onRetry, onBackToCatal
                   className="w-full py-3 bg-white text-indigo-950 font-bold rounded-xl hover:bg-indigo-50 transition duration-200 text-sm shadow-sm flex items-center justify-center space-x-2 disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   <i className="fa-solid fa-robot"></i>
-                  <span>Analyze with Gemini AI</span>
+                  <span>{t.analyzeWithAI}</span>
                 </button>
               </>
             )}
@@ -143,7 +145,7 @@ export default function ResultsScreen({ text, userRecall, onRetry, onBackToCatal
                   onClick={getAIFeedback}
                   className="mt-3 text-xs text-indigo-300 underline"
                 >
-                  Try again
+                  {t.tryAgain}
                 </button>
               </div>
             )}
@@ -153,28 +155,28 @@ export default function ResultsScreen({ text, userRecall, onRetry, onBackToCatal
         {/* Sidebar */}
         <div className="space-y-6">
           <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-            <h3 className="font-bold text-slate-900 mb-4">Controls</h3>
+            <h3 className="font-bold text-slate-900 mb-4">{t.controls}</h3>
             <div className="space-y-3">
               <button
                 onClick={onBackToCatalog}
                 className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition duration-200 text-sm flex items-center justify-center space-x-2 shadow-md shadow-indigo-100"
               >
                 <i className="fa-solid fa-house"></i>
-                <span>Back to Catalog</span>
+                <span>{t.backToCatalog}</span>
               </button>
               <button
                 onClick={onRetry}
                 className="w-full py-3 border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold rounded-xl transition duration-200 text-sm flex items-center justify-center space-x-2"
               >
                 <i className="fa-solid fa-rotate-left"></i>
-                <span>Try This Text Again</span>
+                <span>{t.tryTextAgain}</span>
               </button>
               <button
                 onClick={() => setShowFullText(!showFullText)}
                 className="w-full py-3 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold rounded-xl transition duration-200 text-sm flex items-center justify-center space-x-2"
               >
                 <i className="fa-solid fa-book-open"></i>
-                <span>{showFullText ? 'Hide' : 'Show'} Full Original Text</span>
+                <span>{showFullText ? t.hideFullText : t.showFullText}</span>
               </button>
             </div>
           </div>
@@ -182,7 +184,7 @@ export default function ResultsScreen({ text, userRecall, onRetry, onBackToCatal
           {showFullText && (
             <div className="bg-[#faf8f5] border border-stone-200 rounded-2xl p-6 shadow-sm">
               <h4 className="font-bold text-stone-900 title-font text-sm border-b border-stone-200 pb-2 mb-3">
-                Original: {text.title}
+                {t.original} {text.title}
               </h4>
               <div className="book-font text-xs text-stone-700 leading-relaxed space-y-3">
                 <p>{text.leftPage}</p>

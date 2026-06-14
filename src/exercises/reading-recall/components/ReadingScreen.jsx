@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
+import { useLanguage } from '../../../contexts/LanguageContext';
 
 export default function ReadingScreen({ text, onFinish }) {
   const [timeLeft, setTimeLeft] = useState(40);
   const intervalRef = useRef(null);
   const beepRef = useRef(null);
+  const { t } = useLanguage();
 
   useEffect(() => {
     intervalRef.current = setInterval(() => {
@@ -39,15 +41,15 @@ export default function ReadingScreen({ text, onFinish }) {
         <div className="flex items-center space-x-3">
           <div className={timerClass}>{timeLeft}</div>
           <div>
-            <h3 className="font-bold text-slate-800 text-sm">Time is running out! Read carefully</h3>
-            <p className="text-xs text-slate-500">The textbook page will close automatically.</p>
+            <h3 className="font-bold text-slate-800 text-sm">{t.timeRunningOut}</h3>
+            <p className="text-xs text-slate-500">{t.pageClosesAuto}</p>
           </div>
         </div>
         <button
           onClick={handleFinishEarly}
           className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-lg transition duration-200"
         >
-          Finished Early <i className="fa-solid fa-forward ml-1"></i>
+          {t.finishedEarly} <i className="fa-solid fa-forward ml-1"></i>
         </button>
       </div>
 
@@ -101,7 +103,7 @@ export default function ReadingScreen({ text, onFinish }) {
               <i className="fa-solid fa-earth-americas text-sm"></i>
             </div>
             <div>
-              <span className="font-bold text-emerald-900 text-xs uppercase tracking-wider block">Discover!</span>
+              <span className="font-bold text-emerald-900 text-xs uppercase tracking-wider block">{t.discover}</span>
               <p className="text-xs text-emerald-800 mt-1 leading-snug">{text.trivia}</p>
             </div>
           </div>

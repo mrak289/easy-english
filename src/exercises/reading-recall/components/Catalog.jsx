@@ -1,16 +1,18 @@
+import { useLanguage } from '../../../contexts/LanguageContext';
+
 export default function Catalog({ texts, onSelect }) {
+  const { t } = useLanguage();
+
   return (
     <div className="w-full">
       <div className="text-center mb-10 max-w-2xl mx-auto">
         <span className="text-xs font-bold tracking-wider text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-full uppercase">
-          Choose Your Reading Challenge
+          {t.chooseChallenge}
         </span>
         <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 mt-4 title-font">
-          Improve Reading Speed & Memory
+          {t.improveSpeed}
         </h2>
-        <p className="text-slate-600 mt-2">
-          Pick any story below. You will have exactly 40 seconds to read it. When the timer rings, write down what you remember.
-        </p>
+        <p className="text-slate-600 mt-2">{t.catalogDesc}</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -25,7 +27,7 @@ export default function Catalog({ texts, onSelect }) {
                   {text.category}
                 </span>
                 <span className="text-[11px] text-slate-400 font-semibold">
-                  <i className={`fa-solid ${text.icon} mr-1`}></i> Topic {String(text.id).padStart(2, '0')}
+                  <i className={`fa-solid ${text.icon} mr-1`}></i> {t.topic} {String(text.id).padStart(2, '0')}
                 </span>
               </div>
               <h3 className="font-extrabold text-slate-900 text-lg title-font mb-2">{text.title}</h3>
@@ -35,7 +37,7 @@ export default function Catalog({ texts, onSelect }) {
               onClick={() => onSelect(text)}
               className="w-full py-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold rounded-xl text-xs transition flex items-center justify-center space-x-1"
             >
-              <span>Select Story</span>
+              <span>{t.selectStory}</span>
               <i className="fa-solid fa-chevron-right text-[10px]"></i>
             </button>
           </div>
