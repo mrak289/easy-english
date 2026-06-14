@@ -1,0 +1,9 @@
+services:
+  easy-english:
+    build: .
+    container_name: easy-english
+    restart: unless-stopped
+    ports:
+      - "3080:80"
+    environment:
+      - VITE_GEMINI_API_KEY=${VITE_GEMINI_API_KEY:-}

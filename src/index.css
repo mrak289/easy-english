@@ -1,0 +1,21 @@
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Lora:ital,wght@0,400;0,600;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+@import "tailwindcss";
+
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background-color: #f8fafc;
+  margin: 0;
+}
+
+.book-font {
+  font-family: 'Lora', serif;
+}
+
+.title-font {
+  font-family: 'Fredoka', sans-serif;
+}
+
+textarea::-webkit-scrollbar { width: 8px; }
+textarea::-webkit-scrollbar-track { background: #f1f5f9; }
+textarea::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
