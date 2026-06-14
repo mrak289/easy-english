@@ -1,0 +1,15 @@
+const express = require('express');
+const cookieParser = require('cookie-parser');
+const passport = require('./auth/passport');
+const authRoutes = require('./auth/routes');
+
+const app = express();
+app.use(express.json());
+app.use(cookieParser());
+app.use(passport.initialize());
+
+app.use('/api/auth', authRoutes);
+app.get('/api/health', (req, res) => res.json({ ok: true }));
+
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => console.log(`Backend listening on port ${PORT}`));

@@ -12,4 +12,4 @@ echo "Deploying to $HOST:$REMOTE_DIR ..."
 
 $SSH $HOST "$SUDO bash -c 'cd $REMOTE_DIR && git pull && docker compose build --no-cache && docker compose up -d'"
 
-echo "Done! App: http://192.168.77.9:3080"
+echo "Done! App: https://simplilang.m28.click"

@@ -1,7 +1,12 @@
 {
   "permissions": {
     "allow": [
-      "Bash(gh auth *)"
+      "Bash(gh auth *)",
+      "PowerShell(ssh-keygen -t ed25519 -f \"$env:USERPROFILE\\\\.ssh\\\\id_ed25519\" -N \"\" -C \"easy-english-deploy\" 2>&1)",
+      "PowerShell($env:PATH = $env:PATH + \";C:\\\\Program Files\\\\PuTTY\"; echo y | plink -pw \"d2Q93mY2.#\" truenas_admin@192.168.77.9 \"echo connected && whoami\" 2>&1)",
+      "Bash(ssh -i 'C:\\\\Users\\\\ADM/.ssh/id_ed25519' -o StrictHostKeyChecking=no truenas_admin@192.168.77.9 'echo \"d2Q93mY2.#\" | sudo -S docker logs cloudflared 2>&1')",
+      "Bash(node -e \"console.log\\(require\\('crypto'\\).randomBytes\\(32\\).toString\\('hex'\\)\\)\")",
+      "Bash(git add *)"
     ]
   }
 }

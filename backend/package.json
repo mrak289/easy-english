@@ -1,0 +1,16 @@
+{
+  "name": "easy-english-backend",
+  "version": "1.0.0",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "cookie-parser": "^1.4.6",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "passport": "^0.7.0",
+    "passport-google-oauth20": "^2.0.0",
+    "pg": "^8.11.3"
+  }
+}

@@ -1,7 +1,9 @@
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function Header({ subtitle, showBack = false }) {
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
 
   return (
     <header className="bg-white border-b border-slate-200 py-4 px-6 sticky top-0 z-10 shadow-sm">
@@ -18,21 +20,55 @@ export default function Header({ subtitle, showBack = false }) {
             <p className="text-xs text-slate-500 font-medium">Interactive Learning Hub</p>
           </div>
         </div>
-        {subtitle && (
-          <div className="flex items-center space-x-2 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-lg text-amber-700 text-sm font-semibold">
-            <i className="fa-solid fa-stopwatch text-amber-500 animate-pulse"></i>
-            <span>{subtitle}</span>
-          </div>
-        )}
-        {showBack && !subtitle && (
-          <button
-            onClick={() => navigate(-1)}
-            className="text-sm text-slate-500 hover:text-slate-800 font-semibold flex items-center space-x-1"
-          >
-            <i className="fa-solid fa-chevron-left text-xs"></i>
-            <span>Back</span>
-          </button>
-        )}
+
+        <div className="flex items-center space-x-3">
+          {subtitle && (
+            <div className="flex items-center space-x-2 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-lg text-amber-700 text-sm font-semibold">
+              <i className="fa-solid fa-stopwatch text-amber-500 animate-pulse"></i>
+              <span>{subtitle}</span>
+            </div>
+          )}
+          {showBack && !subtitle && (
+            <button
+              onClick={() => navigate(-1)}
+              className="text-sm text-slate-500 hover:text-slate-800 font-semibold flex items-center space-x-1"
+            >
+              <i className="fa-solid fa-chevron-left text-xs"></i>
+              <span>Back</span>
+            </button>
+          )}
+
+          {user === undefined ? null : user ? (
+            <div className="flex items-center space-x-2">
+              {user.avatar_url && (
+                <img
+                  src={user.avatar_url}
+                  alt={user.name}
+                  className="w-8 h-8 rounded-full border border-slate-200"
+                />
+              )}
+              <span className="text-sm font-medium text-slate-700 hidden sm:block">{user.name}</span>
+              <button
+                onClick={logout}
+                className="text-xs text-slate-400 hover:text-slate-600 font-medium ml-1"
+              >
+                Вийти
+              </button>
+            </div>
+          ) : (
+            <a
+              href="/api/auth/google"
+              className="flex items-center space-x-2 bg-white border border-slate-200 hover:border-slate-300 hover:shadow-sm px-3 py-1.5 rounded-lg text-sm font-medium text-slate-700 transition-all"
+            >
+              <img
+                src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+                alt="Google"
+                className="w-4 h-4"
+              />
+              <span>Увійти</span>
+            </a>
+          )}
+        </div>
       </div>
     </header>
   );

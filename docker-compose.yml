@@ -1,9 +1,43 @@
 services:
-  easy-english:
+  frontend:
     build: .
-    container_name: easy-english
+    container_name: easy-english-frontend
     restart: unless-stopped
     ports:
       - "3080:80"
+    depends_on:
+      - backend
+
+  backend:
+    build: ./backend
+    container_name: easy-english-backend
+    restart: unless-stopped
     environment:
-      - VITE_GEMINI_API_KEY=${VITE_GEMINI_API_KEY:-}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - JWT_SECRET=${JWT_SECRET}
+      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/easy_english
+      - FRONTEND_URL=${FRONTEND_URL}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: easy-english-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=easy_english
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/migrations/001_init.sql:/docker-entrypoint-initdb.d/001_init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
