@@ -7,7 +7,7 @@ export const exerciseTypes = [
     icon: "fa-book-open",
     color: "indigo",
     level: "A2 (Pre-Intermediate)",
-    count: 9,
+    count: 30,
     path: "/reading-recall"
   }
   // Add new exercise types here
