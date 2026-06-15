@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import { useLanguage } from '../../../contexts/LanguageContext';
 
-const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || "";
-
 export default function ResultsScreen({ text, userRecall, onRetry, onBackToCatalog }) {
   const [showFullText, setShowFullText] = useState(false);
   const [aiFeedback, setAiFeedback] = useState(null);
@@ -13,38 +11,26 @@ export default function ResultsScreen({ text, userRecall, onRetry, onBackToCatal
   const getAIFeedback = async () => {
     setAiLoading(true);
     setAiError(null);
-
-    const systemPrompt = "You are a friendly, encouraging English teacher assessing an adult student practicing speed reading. The student was reading a simple textbook story (level A2) and has written a quick summary from memory. Evaluate their summary in clear, easy-to-read English appropriate for an A2 learner. Check if they captured the major details of the story (specified in the prompt). Correct any spelling or grammar mistakes gently. Then, rewrite their summary in simple, perfectly natural English. Be highly encouraging!";
-    const userQuery = `Text Title: "${text.title}"\nTarget Concepts the student should recall: ${text.focusPoints}\n\nStudent's Written Summary from Memory:\n"${userRecall}"`;
-
-    let delay = 1000;
-    for (let retry = 0; retry < 5; retry++) {
-      try {
-        const response = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${GEMINI_API_KEY}`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              contents: [{ parts: [{ text: userQuery }] }],
-              systemInstruction: { parts: [{ text: systemPrompt }] }
-            })
-          }
-        );
-        if (response.ok) {
-          const data = await response.json();
-          const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-          if (responseText) {
-            setAiFeedback(responseText);
-            setAiLoading(false);
-            return;
-          }
+    try {
+      const response = await fetch('/api/ai/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          title: text.title,
+          focusPoints: text.focusPoints,
+          userRecall,
+        })
+      });
+      if (response.ok) {
+        const data = await response.json();
+        if (data.feedback) {
+          setAiFeedback(data.feedback);
+          setAiLoading(false);
+          return;
         }
-      } catch (_) {}
-      await new Promise(r => setTimeout(r, delay));
-      delay *= 2;
-    }
-
+      }
+    } catch (_) {}
     setAiError(t.aiConnectError);
     setAiLoading(false);
   };
@@ -115,13 +101,9 @@ export default function ResultsScreen({ text, userRecall, onRetry, onBackToCatal
             {!aiLoading && !aiFeedback && !aiError && (
               <>
                 <p className="text-sm text-indigo-200 mb-4">{t.aiClickBelow}</p>
-                {!GEMINI_API_KEY && (
-                  <p className="text-xs text-amber-300 mb-3">{t.aiKeyWarning}</p>
-                )}
                 <button
                   onClick={getAIFeedback}
-                  disabled={!GEMINI_API_KEY}
-                  className="w-full py-3 bg-white text-indigo-950 font-bold rounded-xl hover:bg-indigo-50 transition duration-200 text-sm shadow-sm flex items-center justify-center space-x-2 disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="w-full py-3 bg-white text-indigo-950 font-bold rounded-xl hover:bg-indigo-50 transition duration-200 text-sm shadow-sm flex items-center justify-center space-x-2"
                 >
                   <i className="fa-solid fa-robot"></i>
                   <span>{t.analyzeWithAI}</span>

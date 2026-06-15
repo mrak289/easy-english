@@ -1,11 +1,15 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 
+const ADMIN_EMAIL = 'mrak28@gmail.com';
+
 export default function Header({ subtitle, showBack = false }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, logout } = useAuth();
   const { lang, toggleLang, t } = useLanguage();
+  const isAdmin = user?.email === ADMIN_EMAIL;
 
   return (
     <header className="bg-white border-b border-slate-200 py-4 px-6 sticky top-0 z-10 shadow-sm">
@@ -58,6 +62,16 @@ export default function Header({ subtitle, showBack = false }) {
                 />
               )}
               <span className="text-sm font-medium text-slate-700 hidden sm:block">{user.name}</span>
+              {isAdmin && location.pathname !== '/admin' && (
+                <button
+                  onClick={() => navigate('/admin')}
+                  className="text-xs font-bold px-2.5 py-1.5 rounded-lg bg-amber-50 border border-amber-200 hover:bg-amber-100 text-amber-700 transition-all flex items-center gap-1"
+                  title="Адмін-панель"
+                >
+                  <i className="fa-solid fa-shield-halved text-[10px]"></i>
+                  Admin
+                </button>
+              )}
               <button
                 onClick={logout}
                 className="text-xs text-slate-400 hover:text-slate-600 font-medium ml-1"
