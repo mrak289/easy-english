@@ -3,8 +3,13 @@ const router = express.Router();
 const db = require('../db');
 const { requireAuth } = require('../middleware/auth');
 
-const GEMINI_MODEL = 'gemini-2.5-flash';
+const DEFAULT_GEMINI_MODEL = 'gemini-2.5-flash';
 const SYSTEM_PROMPT = "You are a friendly, encouraging English teacher assessing an adult student practicing speed reading. The student was reading a simple textbook story (level A2) and has written a quick summary from memory. Evaluate their summary in clear, easy-to-read English appropriate for an A2 learner. Check if they captured the major details of the story (specified in the prompt). Correct any spelling or grammar mistakes gently. Then, rewrite their summary in simple, perfectly natural English. Be highly encouraging!";
+
+async function getGeminiModel() {
+  const { rows } = await db.query("SELECT value FROM settings WHERE key = 'GEMINI_MODEL'");
+  return rows[0]?.value || DEFAULT_GEMINI_MODEL;
+}
 
 async function getGeminiKeys() {
   const keys = [];
@@ -25,7 +30,7 @@ router.post('/feedback', requireAuth, async (req, res) => {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
-  const apiKeys = await getGeminiKeys();
+  const [apiKeys, geminiModel] = await Promise.all([getGeminiKeys(), getGeminiModel()]);
   if (!apiKeys.length) {
     return res.status(503).json({ error: 'AI feedback is not configured on this server.' });
   }
@@ -37,7 +42,7 @@ router.post('/feedback', requireAuth, async (req, res) => {
   });
 
   for (const apiKey of apiKeys) {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${apiKey}`;
     let delay = 1000;
     for (let retry = 0; retry < 3; retry++) {
       try {

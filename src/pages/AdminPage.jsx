@@ -24,10 +24,48 @@ function StatCard({ icon, label, value, color = 'indigo' }) {
   );
 }
 
+const KEY_META = {
+  GEMINI_API_KEY:     { label: 'Gemini API Key (основний)',  icon: 'fa-wand-magic-sparkles', desc: 'Google AI Studio → API Keys', secret: true },
+  GEMINI_API_KEY_ALT: { label: 'Gemini API Key (резервний)', icon: 'fa-rotate',               desc: 'Використовується якщо основний ключ не відповідає', secret: true },
+  GEMINI_MODEL:       { label: 'Gemini модель',              icon: 'fa-microchip',             desc: 'Модель для аналізу відповідей студентів', secret: false },
+};
+
+function ModelSelector({ value, onChange }) {
+  const [models, setModels] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetch('/api/admin/gemini-models', { credentials: 'include' })
+      .then(r => r.json())
+      .then(data => {
+        if (Array.isArray(data)) setModels(data);
+        else setError(data.error || 'Помилка');
+      })
+      .catch(() => setError('Не вдалося завантажити список моделей'))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) return <p className="text-xs text-slate-500 animate-pulse">Завантаження моделей з Google...</p>;
+  if (error) return <p className="text-xs text-red-400">{error}</p>;
+
+  return (
+    <select
+      value={value}
+      onChange={e => onChange(e.target.value)}
+      className="flex-1 bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-200 font-mono focus:outline-none focus:border-indigo-500"
+    >
+      {models.map(m => (
+        <option key={m.id} value={m.id}>{m.id}</option>
+      ))}
+    </select>
+  );
+}
+
 function SettingsPanel() {
   const [settings, setSettings] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [editing, setEditing] = useState(null); // key being edited
+  const [editing, setEditing] = useState(null);
   const [editValue, setEditValue] = useState('');
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState(null);
@@ -36,8 +74,7 @@ function SettingsPanel() {
     setLoading(true);
     try {
       const r = await fetch('/api/admin/settings', { credentials: 'include' });
-      const data = await r.json();
-      setSettings(data);
+      setSettings(await r.json());
     } finally {
       setLoading(false);
     }
@@ -47,7 +84,7 @@ function SettingsPanel() {
 
   const startEdit = (s) => {
     setEditing(s.key);
-    setEditValue('');
+    setEditValue(KEY_META[s.key]?.secret ? '' : s.rawValue || '');
     setMsg(null);
   };
 
@@ -73,11 +110,6 @@ function SettingsPanel() {
     }
   };
 
-  const LABELS = {
-    GEMINI_API_KEY: { label: 'Gemini API Key (основний)', icon: 'fa-wand-magic-sparkles', desc: 'Google AI Studio → API Keys' },
-    GEMINI_API_KEY_ALT: { label: 'Gemini API Key (резервний)', icon: 'fa-rotate', desc: 'Використовується якщо основний ключ не відповідає' },
-  };
-
   if (loading) return <div className="text-slate-500 text-sm py-6 text-center">Завантаження...</div>;
 
   return (
@@ -88,7 +120,8 @@ function SettingsPanel() {
         </div>
       )}
       {settings.map(s => {
-        const meta = LABELS[s.key] || { label: s.key, icon: 'fa-key', desc: '' };
+        const meta = KEY_META[s.key] || { label: s.key, icon: 'fa-key', desc: '', secret: true };
+        const isEditing = editing === s.key;
         return (
           <div key={s.key} className="bg-slate-800 border border-slate-700 rounded-xl p-4">
             <div className="flex items-start justify-between gap-4">
@@ -108,27 +141,31 @@ function SettingsPanel() {
                 </div>
               </div>
               <button
-                onClick={() => editing === s.key ? setEditing(null) : startEdit(s)}
+                onClick={() => isEditing ? setEditing(null) : startEdit(s)}
                 className="shrink-0 text-xs px-3 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300 transition font-medium"
               >
-                {editing === s.key ? 'Скасувати' : 'Змінити'}
+                {isEditing ? 'Скасувати' : 'Змінити'}
               </button>
             </div>
 
-            {editing === s.key && (
-              <div className="mt-3 flex gap-2">
-                <input
-                  type="password"
-                  value={editValue}
-                  onChange={e => setEditValue(e.target.value)}
-                  placeholder="Вставте новий ключ..."
-                  className="flex-1 bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-200 font-mono placeholder:text-slate-600 focus:outline-none focus:border-indigo-500"
-                  autoFocus
-                />
+            {isEditing && (
+              <div className="mt-3 flex gap-2 items-center">
+                {s.key === 'GEMINI_MODEL' ? (
+                  <ModelSelector value={editValue} onChange={setEditValue} />
+                ) : (
+                  <input
+                    type="password"
+                    value={editValue}
+                    onChange={e => setEditValue(e.target.value)}
+                    placeholder="Вставте новий ключ..."
+                    className="flex-1 bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-200 font-mono placeholder:text-slate-600 focus:outline-none focus:border-indigo-500"
+                    autoFocus
+                  />
+                )}
                 <button
                   onClick={() => save(s.key)}
                   disabled={saving || !editValue}
-                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 text-white text-sm font-semibold rounded-lg transition"
+                  className="shrink-0 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 text-white text-sm font-semibold rounded-lg transition"
                 >
                   {saving ? '...' : 'Зберегти'}
                 </button>

@@ -38,10 +38,13 @@ router.post('/users/:id/block', async (req, res) => {
 router.get('/settings', async (req, res) => {
   try {
     const { rows } = await db.query('SELECT key, value, updated_at FROM settings ORDER BY key');
-    // Mask secrets in response
+    const SECRET_KEYS = new Set(['GEMINI_API_KEY', 'GEMINI_API_KEY_ALT']);
     const masked = rows.map(r => ({
       key: r.key,
-      value: r.value ? '••••••••' + r.value.slice(-4) : '',
+      value: SECRET_KEYS.has(r.key)
+        ? (r.value ? '••••••••' + r.value.slice(-4) : '')
+        : r.value,
+      rawValue: SECRET_KEYS.has(r.key) ? undefined : r.value,
       hasValue: r.value.length > 0,
       updated_at: r.updated_at,
     }));
@@ -63,6 +66,30 @@ router.put('/settings/:key', async (req, res) => {
       [key, value]
     );
     res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Fetch available Gemini models using stored API key
+router.get('/gemini-models', async (req, res) => {
+  try {
+    const { rows } = await db.query(
+      "SELECT key, value FROM settings WHERE key IN ('GEMINI_API_KEY', 'GEMINI_API_KEY_ALT') AND value != '' ORDER BY key"
+    );
+    const apiKey = rows[0]?.value;
+    if (!apiKey) return res.status(503).json({ error: 'No API key configured' });
+
+    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}&pageSize=100`);
+    if (!r.ok) return res.status(r.status).json({ error: 'Failed to fetch models from Google' });
+
+    const data = await r.json();
+    const models = (data.models || [])
+      .filter(m => m.supportedGenerationMethods?.includes('generateContent'))
+      .map(m => ({ id: m.name.replace('models/', ''), displayName: m.displayName || m.name.replace('models/', '') }))
+      .sort((a, b) => a.id.localeCompare(b.id));
+
+    res.json(models);
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
