@@ -46,10 +46,11 @@ export default function Header({ subtitle, showBack = false }) {
 
           <button
             onClick={toggleLang}
-            className="text-xs font-bold px-2.5 py-1.5 rounded-lg border border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-600 transition-all"
-            title="Switch language / Змінити мову"
+            className="flex items-center gap-1.5 text-xs font-bold px-2.5 py-1.5 rounded-lg border border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-600 transition-all"
+            title={lang === 'en' ? 'Switch to Ukrainian' : 'Перемкнути на англійську'}
           >
-            {lang === 'en' ? '🇺🇦 UA' : '🇬🇧 EN'}
+            <span className="text-base leading-none">{lang === 'en' ? '🇬🇧' : '🇺🇦'}</span>
+            <span>{lang === 'en' ? 'EN' : 'UA'}</span>
           </button>
 
           {user === undefined ? null : user ? (

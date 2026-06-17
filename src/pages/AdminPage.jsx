@@ -74,7 +74,8 @@ function SettingsPanel() {
   };
 
   const LABELS = {
-    GEMINI_API_KEY: { label: 'Gemini API Key', icon: 'fa-wand-magic-sparkles', desc: 'Google AI Studio → API Keys' },
+    GEMINI_API_KEY: { label: 'Gemini API Key (основний)', icon: 'fa-wand-magic-sparkles', desc: 'Google AI Studio → API Keys' },
+    GEMINI_API_KEY_ALT: { label: 'Gemini API Key (резервний)', icon: 'fa-rotate', desc: 'Використовується якщо основний ключ не відповідає' },
   };
 
   if (loading) return <div className="text-slate-500 text-sm py-6 text-center">Завантаження...</div>;
