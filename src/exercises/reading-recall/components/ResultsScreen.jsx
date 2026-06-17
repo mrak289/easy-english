@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useLanguage } from '../../../contexts/LanguageContext';
+import CorrectionsPanel from './CorrectionsPanel';
 
 export default function ResultsScreen({ text, userRecall, onRetry, onBackToCatalog }) {
   const [showFullText, setShowFullText] = useState(false);
@@ -7,6 +8,19 @@ export default function ResultsScreen({ text, userRecall, onRetry, onBackToCatal
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState(null);
   const { t } = useLanguage();
+  const savedRef = useRef(false);
+
+  // Auto-save session to history
+  useEffect(() => {
+    if (savedRef.current) return;
+    savedRef.current = true;
+    fetch('/api/history/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ textId: text.id, textTitle: text.title, userRecall }),
+    }).catch(() => {});
+  }, []);
 
   const getAIFeedback = async () => {
     setAiLoading(true);
@@ -16,16 +30,19 @@ export default function ResultsScreen({ text, userRecall, onRetry, onBackToCatal
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({
-          title: text.title,
-          focusPoints: text.focusPoints,
-          userRecall,
-        })
+        body: JSON.stringify({ title: text.title, focusPoints: text.focusPoints, userRecall })
       });
       if (response.ok) {
         const data = await response.json();
         if (data.feedback) {
           setAiFeedback(data.feedback);
+          // Update saved session with feedback
+          fetch('/api/history/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ textId: text.id, textTitle: text.title, userRecall, aiFeedback: data.feedback }),
+          }).catch(() => {});
           setAiLoading(false);
           return;
         }
@@ -76,6 +93,9 @@ export default function ResultsScreen({ text, userRecall, onRetry, onBackToCatal
             </div>
           </div>
 
+          {/* Grammar Corrections */}
+          <CorrectionsPanel userRecall={userRecall} />
+
           {/* AI Feedback */}
           <div className="bg-gradient-to-br from-indigo-900 to-slate-900 text-white rounded-2xl p-6 shadow-md relative overflow-hidden">
             <div className="absolute -right-10 -bottom-10 text-white/5 text-9xl pointer-events-none">
@@ -123,10 +143,7 @@ export default function ResultsScreen({ text, userRecall, onRetry, onBackToCatal
             {aiError && (
               <div className="text-sm bg-white/10 p-4 rounded-xl border border-white/10">
                 <p className="text-red-400 font-bold text-xs">{aiError}</p>
-                <button
-                  onClick={getAIFeedback}
-                  className="mt-3 text-xs text-indigo-300 underline"
-                >
+                <button onClick={getAIFeedback} className="mt-3 text-xs text-indigo-300 underline">
                   {t.tryAgain}
                 </button>
               </div>

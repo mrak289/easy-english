@@ -1,6 +1,6 @@
 import { useLanguage } from '../../../contexts/LanguageContext';
 
-export default function Catalog({ texts, onSelect }) {
+export default function Catalog({ texts, onSelect, onHistory }) {
   const { t } = useLanguage();
 
   return (
@@ -13,6 +13,15 @@ export default function Catalog({ texts, onSelect }) {
           {t.improveSpeed}
         </h2>
         <p className="text-slate-600 mt-2">{t.catalogDesc}</p>
+        {onHistory && (
+          <button
+            onClick={onHistory}
+            className="mt-4 inline-flex items-center space-x-2 text-sm text-indigo-600 hover:text-indigo-800 font-semibold border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 rounded-xl px-4 py-2 transition"
+          >
+            <i className="fa-solid fa-clock-rotate-left"></i>
+            <span>{t.history}</span>
+          </button>
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

@@ -4,6 +4,7 @@ const passport = require('./auth/passport');
 const authRoutes = require('./auth/routes');
 const aiRoutes = require('./ai/routes');
 const adminRoutes = require('./admin/routes');
+const historyRoutes = require('./history/routes');
 const migrate = require('./migrate');
 
 const app = express();
@@ -14,6 +15,7 @@ app.use(passport.initialize());
 app.use('/api/auth', authRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/history', historyRoutes);
 app.get('/api/health', (req, res) => res.json({ ok: true }));
 
 const PORT = process.env.PORT || 3001;

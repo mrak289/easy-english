@@ -81,4 +81,29 @@ export const en = {
   hideFullText: 'Hide Full Original Text',
   original: 'Original:',
   aiConnectError: 'Could not connect to AI teacher. Please check your internet connection or API key.',
+
+  // History
+  history: 'History',
+  myHistory: 'My History',
+  historyEmpty: 'You have not completed any exercises yet.',
+  historyDesc: 'Your previous results are saved here.',
+  viewResult: 'View',
+  backToHistory: 'Back to History',
+  sessionDate: 'Date',
+  sessionText: 'Text',
+  yourRecall: 'Your answer',
+  noFeedback: 'No AI analysis was done',
+
+  // Corrections
+  checkGrammar: 'Check Grammar',
+  grammarTitle: 'Error Breakdown',
+  grammarSubtitle: 'Your text with corrections',
+  noErrors: '✅ No errors found! Great job!',
+  correctedVersion: 'Corrected version',
+  errorWord: 'Error',
+  correction: 'Correction',
+  explanation: 'Explanation',
+  checkingGrammar: 'AI is checking your grammar...',
+  yourOriginalText: 'Your text',
+  errorsFound: 'errors found',
 };

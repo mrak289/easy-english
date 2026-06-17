@@ -5,11 +5,12 @@ import InstructionsModal from './components/InstructionsModal';
 import ReadingScreen from './components/ReadingScreen';
 import WritingScreen from './components/WritingScreen';
 import ResultsScreen from './components/ResultsScreen';
+import HistoryScreen from './components/HistoryScreen';
 import { readingRecallTexts } from '../../data/reading-recall/texts';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 
-const STEPS = { CATALOG: 'catalog', READING: 'reading', WRITING: 'writing', RESULTS: 'results' };
+const STEPS = { CATALOG: 'catalog', READING: 'reading', WRITING: 'writing', RESULTS: 'results', HISTORY: 'history' };
 
 export default function ReadingRecallPage() {
   const { user } = useAuth();
@@ -97,7 +98,11 @@ export default function ReadingRecallPage() {
 
       <main className="flex-grow max-w-5xl w-full mx-auto p-4 md:p-6 flex flex-col justify-center">
         {step === STEPS.CATALOG && (
-          <Catalog texts={readingRecallTexts} onSelect={handleSelectText} />
+          <Catalog
+            texts={readingRecallTexts}
+            onSelect={handleSelectText}
+            onHistory={user ? () => setStep(STEPS.HISTORY) : null}
+          />
         )}
         {step === STEPS.READING && selectedText && (
           <ReadingScreen text={selectedText} onFinish={handleReadingFinish} />
@@ -112,6 +117,9 @@ export default function ReadingRecallPage() {
             onRetry={handleRetry}
             onBackToCatalog={handleBackToCatalog}
           />
+        )}
+        {step === STEPS.HISTORY && (
+          <HistoryScreen onBack={() => setStep(STEPS.CATALOG)} />
         )}
       </main>
 

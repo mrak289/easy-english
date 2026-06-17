@@ -81,4 +81,29 @@ export const uk = {
   hideFullText: 'Приховати повний текст',
   original: 'Оригінал:',
   aiConnectError: 'Не вдалося підключитися до AI-вчителя. Перевірте підключення до інтернету або API ключ.',
+
+  // History
+  history: 'Історія',
+  myHistory: 'Моя історія',
+  historyEmpty: 'Ви ще не виконали жодної вправи.',
+  historyDesc: 'Ваші попередні результати збережені тут.',
+  viewResult: 'Переглянути',
+  backToHistory: 'До історії',
+  sessionDate: 'Дата',
+  sessionText: 'Текст',
+  yourRecall: 'Ваша відповідь',
+  noFeedback: 'AI-аналіз не проводився',
+
+  // Corrections
+  checkGrammar: 'Перевірити граматику',
+  grammarTitle: 'Розбір помилок',
+  grammarSubtitle: 'Ваш текст з виправленнями',
+  noErrors: '✅ Помилок не знайдено! Чудова робота!',
+  correctedVersion: 'Виправлений варіант',
+  errorWord: 'Помилка',
+  correction: 'Виправлення',
+  explanation: 'Пояснення',
+  checkingGrammar: 'AI перевіряє граматику...',
+  yourOriginalText: 'Ваш текст',
+  errorsFound: 'помилок знайдено',
 };

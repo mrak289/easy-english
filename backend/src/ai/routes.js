@@ -24,6 +24,62 @@ async function getGeminiKeys() {
   return keys;
 }
 
+const CORRECTIONS_PROMPT = `You are an English grammar teacher. The student wrote a short summary in English. Your task is to find ALL grammar, spelling, and word-choice errors in their text.
+
+Return ONLY valid JSON (no markdown, no extra text) in this exact format:
+{
+  "correctedText": "the full corrected text here",
+  "errors": [
+    {"original": "exact wrong phrase from text", "corrected": "fixed version", "explanation": "short reason in simple English"}
+  ]
+}
+
+If there are no errors, return: {"correctedText": "...", "errors": []}`;
+
+async function callGemini(systemPrompt, userQuery, apiKeys, geminiModel) {
+  const body = JSON.stringify({
+    contents: [{ parts: [{ text: userQuery }] }],
+    systemInstruction: { parts: [{ text: systemPrompt }] }
+  });
+  for (const apiKey of apiKeys) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${apiKey}`;
+    let delay = 1000;
+    for (let retry = 0; retry < 3; retry++) {
+      try {
+        const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body });
+        if (response.ok) {
+          const data = await response.json();
+          const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (text) return text;
+        }
+        const status = response.status;
+        if (status === 400 || status === 401 || status === 403) break;
+      } catch (_) {}
+      await new Promise(r => setTimeout(r, delay));
+      delay *= 2;
+    }
+  }
+  return null;
+}
+
+router.post('/corrections', requireAuth, async (req, res) => {
+  const { userRecall } = req.body;
+  if (!userRecall) return res.status(400).json({ error: 'Missing userRecall' });
+
+  const [apiKeys, geminiModel] = await Promise.all([getGeminiKeys(), getGeminiModel()]);
+  if (!apiKeys.length) return res.status(503).json({ error: 'AI not configured' });
+
+  const text = await callGemini(CORRECTIONS_PROMPT, `Student's text:\n"${userRecall}"`, apiKeys, geminiModel);
+  if (!text) return res.status(502).json({ error: 'Failed to get corrections' });
+
+  try {
+    const json = JSON.parse(text.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim());
+    return res.json(json);
+  } catch (_) {
+    return res.status(502).json({ error: 'Invalid AI response format' });
+  }
+});
+
 router.post('/feedback', requireAuth, async (req, res) => {
   const { title, focusPoints, userRecall } = req.body;
   if (!title || !focusPoints || !userRecall) {
@@ -36,35 +92,8 @@ router.post('/feedback', requireAuth, async (req, res) => {
   }
 
   const userQuery = `Text Title: "${title}"\nTarget Concepts the student should recall: ${focusPoints}\n\nStudent's Written Summary from Memory:\n"${userRecall}"`;
-  const body = JSON.stringify({
-    contents: [{ parts: [{ text: userQuery }] }],
-    systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] }
-  });
-
-  for (const apiKey of apiKeys) {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${apiKey}`;
-    let delay = 1000;
-    for (let retry = 0; retry < 3; retry++) {
-      try {
-        const response = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body,
-        });
-        if (response.ok) {
-          const data = await response.json();
-          const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-          if (text) return res.json({ feedback: text });
-        }
-        // 429 or 5xx — retry with same key; 400/401/403 — broken key, try next
-        const status = response.status;
-        if (status === 400 || status === 401 || status === 403) break;
-      } catch (_) {}
-      await new Promise(r => setTimeout(r, delay));
-      delay *= 2;
-    }
-  }
-
+  const text = await callGemini(SYSTEM_PROMPT, userQuery, apiKeys, geminiModel);
+  if (text) return res.json({ feedback: text });
   res.status(502).json({ error: 'Failed to get AI feedback after retries.' });
 });
 
