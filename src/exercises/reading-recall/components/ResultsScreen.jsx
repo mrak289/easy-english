@@ -1,25 +1,29 @@
 import { useState, useEffect, useRef } from 'react';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import CorrectionsPanel from './CorrectionsPanel';
+import ScoreCard from './ScoreCard';
 
 export default function ResultsScreen({ text, userRecall, onRetry, onBackToCatalog }) {
   const [showFullText, setShowFullText] = useState(false);
   const [aiFeedback, setAiFeedback] = useState(null);
+  const [score, setScore] = useState(null);
+  const [criteria, setCriteria] = useState(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState(null);
   const { t } = useLanguage();
-  const savedRef = useRef(false);
+  const sessionIdRef = useRef(null);
 
-  // Auto-save session to history
+  // Save once on mount — get back session id for later PATCH
   useEffect(() => {
-    if (savedRef.current) return;
-    savedRef.current = true;
     fetch('/api/history/save', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
       body: JSON.stringify({ textId: text.id, textTitle: text.title, userRecall }),
-    }).catch(() => {});
+    })
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data?.id) sessionIdRef.current = data.id; })
+      .catch(() => {});
   }, []);
 
   const getAIFeedback = async () => {
@@ -30,19 +34,25 @@ export default function ResultsScreen({ text, userRecall, onRetry, onBackToCatal
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ title: text.title, focusPoints: text.focusPoints, userRecall })
+        body: JSON.stringify({ title: text.title, focusPoints: text.focusPoints, userRecall }),
       });
       if (response.ok) {
         const data = await response.json();
         if (data.feedback) {
           setAiFeedback(data.feedback);
-          // Update saved session with feedback
-          fetch('/api/history/save', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({ textId: text.id, textTitle: text.title, userRecall, aiFeedback: data.feedback }),
-          }).catch(() => {});
+          if (data.score != null) setScore(data.score);
+          if (data.criteria) setCriteria(data.criteria);
+
+          // PATCH existing session — no new row
+          if (sessionIdRef.current) {
+            fetch(`/api/history/${sessionIdRef.current}`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify({ aiFeedback: data.feedback, score: data.score, criteria: data.criteria }),
+            }).catch(() => {});
+          }
+
           setAiLoading(false);
           return;
         }
@@ -76,9 +86,7 @@ export default function ResultsScreen({ text, userRecall, onRetry, onBackToCatal
                   {t.originalHighlights}
                 </span>
                 <div className="text-xs text-slate-700 mt-3 space-y-2 leading-relaxed">
-                  {text.highlights.map((h, i) => (
-                    <p key={i}>⭐ {h}</p>
-                  ))}
+                  {text.highlights.map((h, i) => <p key={i}>⭐ {h}</p>)}
                 </div>
               </div>
             </div>
@@ -86,9 +94,7 @@ export default function ResultsScreen({ text, userRecall, onRetry, onBackToCatal
             <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl">
               <h4 className="font-bold text-xs text-slate-700 uppercase tracking-wide mb-2">{t.selfAssessment}</h4>
               <ul className="text-xs text-slate-600 space-y-1 list-disc list-inside">
-                {text.checklist.map((item, i) => (
-                  <li key={i}>{item}</li>
-                ))}
+                {text.checklist.map((item, i) => <li key={i}>{item}</li>)}
               </ul>
             </div>
           </div>
@@ -132,7 +138,7 @@ export default function ResultsScreen({ text, userRecall, onRetry, onBackToCatal
             )}
 
             {aiFeedback && (
-              <div className="text-sm leading-relaxed space-y-3 bg-white/10 p-4 rounded-xl border border-white/10">
+              <div className="text-sm leading-relaxed bg-white/10 p-4 rounded-xl border border-white/10">
                 <div
                   className="text-slate-100 text-xs md:text-sm"
                   dangerouslySetInnerHTML={{ __html: aiFeedback.replace(/\n/g, '<br>') }}
@@ -153,6 +159,9 @@ export default function ResultsScreen({ text, userRecall, onRetry, onBackToCatal
 
         {/* Sidebar */}
         <div className="space-y-6">
+          {/* Score card */}
+          <ScoreCard score={score} criteria={criteria} pending={score == null} />
+
           <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
             <h3 className="font-bold text-slate-900 mb-4">{t.controls}</h3>
             <div className="space-y-3">

@@ -94,6 +94,13 @@ export const en = {
   yourRecall: 'Your answer',
   noFeedback: 'No AI analysis was done',
 
+  // Score / Rating
+  scoreOverall: 'Overall Score',
+  scoreAccuracy: 'Recall Accuracy',
+  scoreGrammar: 'Grammar',
+  scoreDetail: 'Detail Level',
+  scoreAwait: 'Run AI analysis to get a score',
+
   // Corrections
   checkGrammar: 'Check Grammar',
   grammarTitle: 'Error Breakdown',

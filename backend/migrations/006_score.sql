@@ -1,0 +1,2 @@
+ALTER TABLE recall_sessions ADD COLUMN IF NOT EXISTS score INTEGER;
+ALTER TABLE recall_sessions ADD COLUMN IF NOT EXISTS criteria JSONB;

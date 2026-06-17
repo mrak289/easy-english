@@ -94,6 +94,13 @@ export const uk = {
   yourRecall: 'Ваша відповідь',
   noFeedback: 'AI-аналіз не проводився',
 
+  // Score / Rating
+  scoreOverall: 'Загальна оцінка',
+  scoreAccuracy: 'Точність переказу',
+  scoreGrammar: 'Граматика',
+  scoreDetail: 'Деталізація',
+  scoreAwait: 'Запустіть AI-аналіз, щоб отримати оцінку',
+
   // Corrections
   checkGrammar: 'Перевірити граматику',
   grammarTitle: 'Розбір помилок',

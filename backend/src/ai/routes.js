@@ -4,7 +4,27 @@ const db = require('../db');
 const { requireAuth } = require('../middleware/auth');
 
 const DEFAULT_GEMINI_MODEL = 'gemini-2.5-flash';
-const SYSTEM_PROMPT = "You are a friendly, encouraging English teacher assessing an adult student practicing speed reading. The student was reading a simple textbook story (level A2) and has written a quick summary from memory. Evaluate their summary in clear, easy-to-read English appropriate for an A2 learner. Check if they captured the major details of the story (specified in the prompt). Correct any spelling or grammar mistakes gently. Then, rewrite their summary in simple, perfectly natural English. Be highly encouraging!";
+const SYSTEM_PROMPT = `You are a friendly, encouraging English teacher assessing an adult student (level A2) practicing speed reading.
+
+The student read a short text and wrote a summary from memory. Evaluate their summary and return ONLY valid JSON (no markdown, no extra text):
+
+{
+  "feedback": "Your full evaluation here. Check if they captured the main ideas. Gently correct grammar mistakes. Rewrite their summary in perfect natural English. Be encouraging! Use \\n for new paragraphs.",
+  "score": 7,
+  "criteria": {
+    "accuracy": 7,
+    "grammar": 8,
+    "detail": 6
+  }
+}
+
+Scoring guide (each criterion 1–10):
+- accuracy: how well they recalled the key facts and ideas from the target concepts
+- grammar: quality of English grammar, spelling, sentence structure
+- detail: how many specific details they included (not just vague generalities)
+- score: overall weighted score (accuracy counts most)
+
+Return ONLY the JSON object, nothing else.`;
 
 async function getGeminiModel() {
   const { rows } = await db.query("SELECT value FROM settings WHERE key = 'GEMINI_MODEL'");
@@ -92,9 +112,16 @@ router.post('/feedback', requireAuth, async (req, res) => {
   }
 
   const userQuery = `Text Title: "${title}"\nTarget Concepts the student should recall: ${focusPoints}\n\nStudent's Written Summary from Memory:\n"${userRecall}"`;
-  const text = await callGemini(SYSTEM_PROMPT, userQuery, apiKeys, geminiModel);
-  if (text) return res.json({ feedback: text });
-  res.status(502).json({ error: 'Failed to get AI feedback after retries.' });
+  const raw = await callGemini(SYSTEM_PROMPT, userQuery, apiKeys, geminiModel);
+  if (!raw) return res.status(502).json({ error: 'Failed to get AI feedback after retries.' });
+
+  try {
+    const json = JSON.parse(raw.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim());
+    return res.json({ feedback: json.feedback, score: json.score, criteria: json.criteria });
+  } catch (_) {
+    // Fallback: treat raw text as plain feedback (no score)
+    return res.json({ feedback: raw });
+  }
 });
 
 module.exports = router;

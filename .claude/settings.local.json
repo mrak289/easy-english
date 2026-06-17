@@ -6,7 +6,24 @@
       "PowerShell($env:PATH = $env:PATH + \";C:\\\\Program Files\\\\PuTTY\"; echo y | plink -pw \"d2Q93mY2.#\" truenas_admin@192.168.77.9 \"echo connected && whoami\" 2>&1)",
       "Bash(ssh -i 'C:\\\\Users\\\\ADM/.ssh/id_ed25519' -o StrictHostKeyChecking=no truenas_admin@192.168.77.9 'echo \"d2Q93mY2.#\" | sudo -S docker logs cloudflared 2>&1')",
       "Bash(node -e \"console.log\\(require\\('crypto'\\).randomBytes\\(32\\).toString\\('hex'\\)\\)\")",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(npm install *)",
+      "Bash(git commit -m 'Add backend package-lock.json *)",
+      "Bash(git push *)",
+      "Bash(git commit *)",
+      "Bash(bash deploy.sh)",
+      "Bash(curl -s https://simplilang.m28.click/)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\ADM\\\\Documents\\\\ai_projects\\\\easy-english\" -Recurse -Force)",
+      "Bash(Select-Object FullName)",
+      "Bash(ConvertTo-Csv -NoTypeInformation)",
+      "Bash(Out-String)",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\ADM\\\\Documents\\\\ai_projects\\\\easy-english\" -Recurse -Force | Select-Object FullName | ForEach-Object { $_.FullName })",
+      "Bash(npx vite *)",
+      "Bash(git restore *)",
+      "Bash(ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no truenas_admin@192.168.77.9 \"echo 'd2Q93mY2.#' | sudo -S docker exec easy-english-backend node -e \\\\\"const db = require\\('./src/db'\\); db.query\\(\\\\\\\\\\\\\"SELECT key, value, length\\(value\\) as len FROM settings\\\\\\\\\\\\\"\\).then\\(r => { console.log\\(JSON.stringify\\(r.rows\\)\\); process.exit\\(\\); }\\)\\\\\" 2>&1\")",
+      "Bash(node --check backend/src/ai/routes.js)",
+      "Bash(node --check backend/src/history/routes.js)",
+      "Bash(node --check backend/src/index.js)"
     ]
   }
 }
