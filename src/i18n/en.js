@@ -101,6 +101,28 @@ export const en = {
   scoreDetail: 'Detail Level',
   scoreAwait: 'Run AI analysis to get a score',
 
+  // Vocabulary
+  vocabularyBadge: 'Vocabulary',
+  vocabularyTitle: 'My Vocabulary',
+  vocabularyDesc: 'Add new words, get AI-powered explanations and track your progress.',
+  addWord: 'Add a new word',
+  addWordPlaceholder: 'Type a word in English...',
+  addWordBtn: 'Add',
+  addWordLoading: 'Processing...',
+  addWordAiHint: 'AI is generating a definition...',
+  filter_all: 'All',
+  filter_new: 'New',
+  filter_learning: 'Learning',
+  filter_learned: 'Learned',
+  viewCards: 'Cards',
+  viewList: 'List',
+  vocabEmpty: 'Your vocabulary is empty. Add your first word!',
+  vocabFilterEmpty: 'No words with this status.',
+  vocabSignInPrompt: 'Sign in to use the vocabulary feature.',
+  vocabExerciseTitle: 'My Vocabulary',
+  vocabExerciseDesc: 'Add unknown words, get AI definitions and images. Mark words as "learning" or "learned" to track your progress.',
+  vocabExerciseCount: 'Your words',
+
   // Corrections
   checkGrammar: 'Check Grammar',
   grammarTitle: 'Error Breakdown',

@@ -10,5 +10,14 @@ export const exerciseTypes = [
     count: 30,
     path: "/reading-recall"
   }
-  // Add new exercise types here
+  ,{
+    id: "vocabulary",
+    titleKey: "vocabExerciseTitle",
+    descriptionKey: "vocabExerciseDesc",
+    icon: "fa-book",
+    color: "violet",
+    level: "A1–C1",
+    count: null,
+    path: "/vocabulary"
+  }
 ];

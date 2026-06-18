@@ -101,6 +101,28 @@ export const uk = {
   scoreDetail: 'Деталізація',
   scoreAwait: 'Запустіть AI-аналіз, щоб отримати оцінку',
 
+  // Vocabulary
+  vocabularyBadge: 'Словник',
+  vocabularyTitle: 'Мій словник',
+  vocabularyDesc: 'Додавайте нові слова, отримуйте пояснення від AI та відстежуйте прогрес.',
+  addWord: 'Додати нове слово',
+  addWordPlaceholder: 'Введіть слово англійською...',
+  addWordBtn: 'Додати',
+  addWordLoading: 'Обробка...',
+  addWordAiHint: 'AI генерує пояснення...',
+  filter_all: 'Всі',
+  filter_new: 'Нові',
+  filter_learning: 'Вивчаються',
+  filter_learned: 'Вивчені',
+  viewCards: 'Картки',
+  viewList: 'Список',
+  vocabEmpty: 'Ваш словник порожній. Додайте перше слово!',
+  vocabFilterEmpty: 'Немає слів з таким статусом.',
+  vocabSignInPrompt: 'Увійдіть в систему, щоб користуватись словником.',
+  vocabExerciseTitle: 'Мій словник',
+  vocabExerciseDesc: 'Додавайте незнайомі слова, отримуйте визначення від AI та зображення. Відмічайте слова як "вивчається" або "вивчено".',
+  vocabExerciseCount: 'Ваші слова',
+
   // Corrections
   checkGrammar: 'Перевірити граматику',
   grammarTitle: 'Розбір помилок',

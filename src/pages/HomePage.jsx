@@ -21,6 +21,12 @@ const colorMap = {
     icon: 'bg-amber-100 text-amber-600',
     btn: 'bg-amber-50 hover:bg-amber-100 text-amber-700',
     dot: 'bg-amber-400'
+  },
+  violet: {
+    badge: 'bg-violet-50 text-violet-700',
+    icon: 'bg-violet-100 text-violet-600',
+    btn: 'bg-violet-50 hover:bg-violet-100 text-violet-700',
+    dot: 'bg-violet-400'
   }
 };
 
@@ -61,11 +67,17 @@ export default function HomePage() {
                       <i className={`fa-solid ${type.icon}`}></i>
                     </span>
                   </div>
-                  <h3 className="font-extrabold text-slate-900 text-lg title-font mb-2">{t.exerciseTitle}</h3>
-                  <p className="text-slate-500 text-xs leading-relaxed mb-2">{t.exerciseDescription}</p>
+                  <h3 className="font-extrabold text-slate-900 text-lg title-font mb-2">
+                    {type.titleKey ? t[type.titleKey] : t.exerciseTitle}
+                  </h3>
+                  <p className="text-slate-500 text-xs leading-relaxed mb-2">
+                    {type.descriptionKey ? t[type.descriptionKey] : t.exerciseDescription}
+                  </p>
                   <div className="flex items-center space-x-1.5 mt-3 mb-6">
                     <span className={`w-2 h-2 rounded-full ${colors.dot}`}></span>
-                    <span className="text-xs text-slate-500 font-medium">{type.count} {t.exercisesAvailable}</span>
+                    <span className="text-xs text-slate-500 font-medium">
+                      {type.count != null ? `${type.count} ${t.exercisesAvailable}` : t.vocabExerciseCount}
+                    </span>
                   </div>
                 </div>
                 <button
