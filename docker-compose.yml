@@ -40,5 +40,32 @@ services:
       timeout: 5s
       retries: 5
 
+  allure:
+    image: frankescobar/allure-docker-service:latest
+    container_name: easy-english-allure
+    restart: unless-stopped
+    ports:
+      - "5050:5050"
+    environment:
+      - CHECK_RESULTS_EVERY_SECONDS=3
+      - KEEP_HISTORY=20
+    volumes:
+      - allure_results:/app/allure-results
+      - allure_reports:/app/default-reports
+
+  allure-ui:
+    image: frankescobar/allure-docker-service-ui:latest
+    container_name: easy-english-allure-ui
+    restart: unless-stopped
+    ports:
+      - "5252:5252"
+    environment:
+      - ALLURE_DOCKER_PUBLIC_API_URL=http://192.168.77.9:5050
+      - ALLURE_DOCKER_PUBLIC_API_URL_PREFIX=
+    depends_on:
+      - allure
+
 volumes:
   postgres_data:
+  allure_results:
+  allure_reports:
