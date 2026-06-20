@@ -5,6 +5,7 @@ import HomePage from './pages/HomePage';
 import ReadingRecallPage from './exercises/reading-recall/ReadingRecallPage';
 import AdminPage from './pages/AdminPage';
 import VocabularyPage from './pages/VocabularyPage';
+import QuickLookupWidget from './components/QuickLookupWidget';
 
 export default function App() {
   return (
@@ -17,6 +18,7 @@ export default function App() {
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/vocabulary" element={<VocabularyPage />} />
         </Routes>
+        <QuickLookupWidget />
       </BrowserRouter>
     </AuthProvider>
     </LanguageProvider>

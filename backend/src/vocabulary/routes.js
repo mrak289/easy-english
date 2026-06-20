@@ -39,6 +39,34 @@ async function callGemini(prompt, apiKeys, geminiModel) {
   return null;
 }
 
+// POST /api/vocabulary/explain — quick lookup (no auth required)
+router.post('/explain', async (req, res) => {
+  const { word, level = 'A2' } = req.body;
+  if (!word || !word.trim()) return res.status(400).json({ error: 'Word is required' });
+
+  const clean = word.trim();
+  const [apiKeys, geminiModel] = await Promise.all([getGeminiKeys(), getGeminiModel()]);
+
+  if (!apiKeys.length) return res.status(503).json({ error: 'AI not configured' });
+
+  const prompt = `You are an English teacher. Explain the word or phrase "${clean}" in English at ${level} level (simple vocabulary).
+Return ONLY a valid JSON object in this exact format (no markdown, no code block):
+{"explanation":"...", "examples":["...","..."]}
+- explanation: 1-2 simple sentences defining the word/phrase
+- examples: exactly 2 short example sentences using it`;
+
+  const raw = await callGemini(prompt, apiKeys, geminiModel);
+  if (!raw) return res.status(502).json({ error: 'AI unavailable' });
+
+  try {
+    const jsonStr = raw.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '').trim();
+    const result = JSON.parse(jsonStr);
+    res.json({ word: clean, explanation: result.explanation, examples: result.examples });
+  } catch {
+    res.status(502).json({ error: 'Could not parse AI response' });
+  }
+});
+
 // GET /api/vocabulary — list user's words
 router.get('/', requireAuth, async (req, res) => {
   try {
