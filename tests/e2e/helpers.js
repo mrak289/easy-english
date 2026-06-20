@@ -57,6 +57,26 @@ export async function mockVocabularyApi(page, words = []) {
 }
 
 /**
+ * Mock Quick Lookup explain API
+ */
+export async function mockExplainApi(page, override = {}) {
+  await page.route('/api/vocabulary/explain', route =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        word: override.word || 'serendipity',
+        explanation: override.explanation || 'Serendipity means finding something good without looking for it.',
+        examples: override.examples || [
+          'It was serendipity that I met my best friend on the train.',
+          'Finding that old book was a happy serendipity.',
+        ],
+      }),
+    })
+  );
+}
+
+/**
  * Mock history API
  */
 export async function mockHistoryApi(page, history = []) {

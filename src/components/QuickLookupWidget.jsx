@@ -88,7 +88,7 @@ export default function QuickLookupWidget() {
         className="fixed bottom-6 right-6 z-40 bg-indigo-600 hover:bg-indigo-700 text-white w-14 h-14 rounded-full shadow-lg shadow-indigo-200 flex items-center justify-center transition-all hover:scale-105 active:scale-95"
         title="Quick Lookup (Ctrl+K)"
       >
-        <i className="fa-solid fa-magnifying-glass text-xl"></i>
+        <i className="fa-solid fa-book-open text-xl"></i>
       </button>
 
       {/* Modal */}
@@ -124,7 +124,7 @@ export default function QuickLookupWidget() {
                   onChange={e => setLevel(e.target.value)}
                   className="border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-300 bg-white"
                 >
-                  {LEVELS.map(l => <option key={l}>{l}</option>)}
+                  {LEVELS.map(l => <option key={l} value={l}>{l}</option>)}
                 </select>
                 <button
                   type="submit"
