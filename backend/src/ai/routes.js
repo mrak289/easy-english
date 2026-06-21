@@ -82,6 +82,57 @@ async function callGemini(systemPrompt, userQuery, apiKeys, geminiModel) {
   return null;
 }
 
+const PHOTO_EXTRACT_PROMPT = `Extract all the text visible in this image exactly as written. Return ONLY the extracted text, no explanations or formatting. If there is no text, return an empty string.`;
+
+async function callGeminiVision(prompt, imageBase64, mimeType, apiKeys, geminiModel) {
+  const body = JSON.stringify({
+    contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: mimeType, data: imageBase64 } }] }]
+  });
+  for (const apiKey of apiKeys) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${apiKey}`;
+    let delay = 1000;
+    for (let retry = 0; retry < 3; retry++) {
+      try {
+        const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body });
+        if (response.ok) {
+          const data = await response.json();
+          const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (text) return text;
+        }
+        const status = response.status;
+        if (status === 400 || status === 401 || status === 403) break;
+      } catch (_) {}
+      await new Promise(r => setTimeout(r, delay));
+      delay *= 2;
+    }
+  }
+  return null;
+}
+
+router.post('/photo-grammar', requireAuth, async (req, res) => {
+  const { imageBase64, mimeType } = req.body;
+  if (!imageBase64 || !mimeType) return res.status(400).json({ error: 'Missing image data' });
+
+  const [apiKeys, geminiModel] = await Promise.all([getGeminiKeys(), getGeminiModel()]);
+  if (!apiKeys.length) return res.status(503).json({ error: 'AI not configured' });
+
+  const extractedText = await callGeminiVision(PHOTO_EXTRACT_PROMPT, imageBase64, mimeType, apiKeys, geminiModel);
+  if (!extractedText || !extractedText.trim()) {
+    return res.status(422).json({ error: 'No text found in the image' });
+  }
+
+  const trimmed = extractedText.trim();
+  const grammarRaw = await callGemini(CORRECTIONS_PROMPT, `Student's text:\n"${trimmed}"`, apiKeys, geminiModel);
+  if (!grammarRaw) return res.status(502).json({ error: 'Failed to check grammar' });
+
+  try {
+    const json = JSON.parse(grammarRaw.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim());
+    return res.json({ extractedText: trimmed, ...json });
+  } catch (_) {
+    return res.status(502).json({ error: 'Invalid AI response format' });
+  }
+});
+
 router.post('/corrections', requireAuth, async (req, res) => {
   const { userRecall } = req.body;
   if (!userRecall) return res.status(400).json({ error: 'Missing userRecall' });

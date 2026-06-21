@@ -6,6 +6,7 @@ import ReadingRecallPage from './exercises/reading-recall/ReadingRecallPage';
 import AdminPage from './pages/AdminPage';
 import VocabularyPage from './pages/VocabularyPage';
 import QuickLookupWidget from './components/QuickLookupWidget';
+import PhotoGrammarWidget from './components/PhotoGrammarWidget';
 
 export default function App() {
   return (
@@ -19,6 +20,7 @@ export default function App() {
           <Route path="/vocabulary" element={<VocabularyPage />} />
         </Routes>
         <QuickLookupWidget />
+        <PhotoGrammarWidget />
       </BrowserRouter>
     </AuthProvider>
     </LanguageProvider>
