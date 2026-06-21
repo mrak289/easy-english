@@ -24,13 +24,22 @@ export default function PhotoGrammarWidget() {
     if (!file) return;
     const reader = new FileReader();
     reader.onload = (e) => {
-      const dataUrl = e.target.result;
-      const [header, base64] = dataUrl.split(',');
-      const mimeType = header.match(/:(.*?);/)[1];
-      setImage({ base64, mimeType, previewUrl: dataUrl });
-      setResult(null);
-      setError(null);
-      setSaved(false);
+      const img = new Image();
+      img.onload = () => {
+        const MAX = 1600;
+        const scale = Math.min(1, MAX / Math.max(img.width, img.height));
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+        const base64 = dataUrl.split(',')[1];
+        setImage({ base64, mimeType: 'image/jpeg', previewUrl: dataUrl });
+        setResult(null);
+        setError(null);
+        setSaved(false);
+      };
+      img.src = e.target.result;
     };
     reader.readAsDataURL(file);
   }
