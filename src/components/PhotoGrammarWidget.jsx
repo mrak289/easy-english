@@ -1,6 +1,26 @@
 import { useState, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 
+function highlightErrors(text, errors) {
+  if (!errors || errors.length === 0) return [{ type: 'text', value: text }];
+  const parts = [];
+  let remaining = text;
+  const sorted = [...errors].sort((a, b) => {
+    const ia = text.toLowerCase().indexOf(a.original.toLowerCase());
+    const ib = text.toLowerCase().indexOf(b.original.toLowerCase());
+    return ia - ib;
+  });
+  for (const err of sorted) {
+    const idx = remaining.toLowerCase().indexOf(err.original.toLowerCase());
+    if (idx === -1) continue;
+    if (idx > 0) parts.push({ type: 'text', value: remaining.slice(0, idx) });
+    parts.push({ type: 'error', value: remaining.slice(idx, idx + err.original.length), error: err });
+    remaining = remaining.slice(idx + err.original.length);
+  }
+  if (remaining) parts.push({ type: 'text', value: remaining });
+  return parts;
+}
+
 export default function PhotoGrammarWidget() {
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
@@ -8,6 +28,7 @@ export default function PhotoGrammarWidget() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
+  const [activeError, setActiveError] = useState(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const uploadRef = useRef(null);
@@ -18,6 +39,7 @@ export default function PhotoGrammarWidget() {
     setResult(null);
     setError(null);
     setSaved(false);
+    setActiveError(null);
   }
 
   function handleFile(file) {
@@ -197,9 +219,45 @@ export default function PhotoGrammarWidget() {
 
               {result && (
                 <div className="space-y-4">
+                  {/* Extracted text with inline highlights */}
                   <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
                     <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">Extracted Text</p>
-                    <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">{result.extractedText}</p>
+                    <div className="text-sm text-slate-700 leading-relaxed">
+                      {highlightErrors(result.extractedText, result.errors).map((part, i) =>
+                        part.type === 'text' ? (
+                          <span key={i}>{part.value}</span>
+                        ) : (
+                          <span
+                            key={i}
+                            className="relative cursor-pointer"
+                            onClick={() => setActiveError(activeError === i ? null : i)}
+                          >
+                            <span className="bg-red-100 text-red-700 border-b-2 border-red-400 rounded px-0.5 font-medium">
+                              {part.value}
+                            </span>
+                            {activeError === i && (
+                              <span className="absolute left-0 top-6 z-10 bg-white border border-slate-200 rounded-xl shadow-lg p-3 w-56 text-xs text-slate-700 space-y-1">
+                                <span className="flex items-center gap-1">
+                                  <i className="fa-solid fa-xmark text-red-500"></i>
+                                  <span className="line-through text-red-500">{part.error.original}</span>
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <i className="fa-solid fa-check text-teal-500"></i>
+                                  <span className="font-bold text-teal-700">{part.error.corrected}</span>
+                                </span>
+                                <span className="text-slate-500 border-t border-slate-100 pt-1 block">{part.error.explanation}</span>
+                              </span>
+                            )}
+                          </span>
+                        )
+                      )}
+                    </div>
+                    {result.errors?.length > 0 && (
+                      <p className="text-xs text-slate-400 mt-2">
+                        <i className="fa-solid fa-circle-info mr-1"></i>
+                        {result.errors.length} issue{result.errors.length !== 1 ? 's' : ''} found — tap a red word for details
+                      </p>
+                    )}
                   </div>
 
                   {result.errors?.length > 0 ? (
@@ -208,14 +266,16 @@ export default function PhotoGrammarWidget() {
                         {result.errors.length} issue{result.errors.length !== 1 ? 's' : ''} found
                       </p>
                       {result.errors.map((err, i) => (
-                        <div key={i} className="bg-red-50 border border-red-100 rounded-xl p-3 space-y-1">
-                          <div className="flex items-start gap-2 flex-wrap">
-                            <i className="fa-solid fa-circle-xmark text-red-400 text-xs mt-1"></i>
-                            <span className="line-through text-red-500 text-sm">{err.original}</span>
-                            <span className="text-slate-400 text-sm">→</span>
-                            <span className="text-teal-600 font-medium text-sm">{err.corrected}</span>
+                        <div key={i} className="flex items-start gap-3 bg-red-50 border border-red-100 rounded-xl p-3">
+                          <span className="shrink-0 w-5 h-5 bg-red-200 text-red-700 rounded-full text-xs flex items-center justify-center font-bold">{i + 1}</span>
+                          <div className="text-xs space-y-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="line-through text-red-600 font-medium">{err.original}</span>
+                              <i className="fa-solid fa-arrow-right text-slate-400 text-[10px]"></i>
+                              <span className="text-teal-700 font-bold">{err.corrected}</span>
+                            </div>
+                            <p className="text-slate-500">{err.explanation}</p>
                           </div>
-                          <p className="text-xs text-slate-500 pl-5">{err.explanation}</p>
                         </div>
                       ))}
                     </div>
@@ -229,7 +289,7 @@ export default function PhotoGrammarWidget() {
                   {result.errors?.length > 0 && (
                     <div className="bg-teal-50 border border-teal-100 rounded-xl p-4">
                       <p className="text-xs font-semibold text-teal-600 uppercase tracking-wide mb-2">Corrected Version</p>
-                      <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">{result.correctedText}</p>
+                      <p className="text-sm text-slate-700 leading-relaxed italic">"{result.correctedText}"</p>
                     </div>
                   )}
 
