@@ -84,3 +84,35 @@ export async function mockHistoryApi(page, history = []) {
     route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(history) })
   );
 }
+
+/**
+ * Mock Photo Grammar API
+ */
+export async function mockPhotoGrammarApi(page, override = {}) {
+  await page.route('/api/ai/photo-grammar', route =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        extractedText: override.extractedText || 'I goed to the store yesterday and buyed some milk.',
+        correctedText: override.correctedText || 'I went to the store yesterday and bought some milk.',
+        errors: override.errors ?? [
+          { original: 'goed', corrected: 'went', explanation: '"go" is an irregular verb; past tense is "went".' },
+          { original: 'buyed', corrected: 'bought', explanation: '"buy" is an irregular verb; past tense is "bought".' },
+        ],
+      }),
+    })
+  );
+}
+
+/**
+ * Mock history save + patch for photo grammar
+ */
+export async function mockHistorySaveApi(page, sessionId = 42) {
+  await page.route('/api/history/save', route =>
+    route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ id: sessionId }) })
+  );
+  await page.route(`/api/history/${sessionId}`, route =>
+    route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ok: true }) })
+  );
+}
