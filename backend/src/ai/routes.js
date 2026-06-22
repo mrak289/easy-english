@@ -109,6 +109,19 @@ async function callGeminiVision(prompt, imageBase64, mimeType, apiKeys, geminiMo
   return null;
 }
 
+router.post('/extract-text', requireAuth, async (req, res) => {
+  const { imageBase64, mimeType } = req.body;
+  if (!imageBase64 || !mimeType) return res.status(400).json({ error: 'Missing image data' });
+
+  const [apiKeys, geminiModel] = await Promise.all([getGeminiKeys(), getGeminiModel()]);
+  if (!apiKeys.length) return res.status(503).json({ error: 'AI not configured' });
+
+  const extracted = await callGeminiVision(PHOTO_EXTRACT_PROMPT, imageBase64, mimeType, apiKeys, geminiModel);
+  if (!extracted || !extracted.trim()) return res.status(422).json({ error: 'No text found in the image' });
+
+  return res.json({ text: extracted.trim() });
+});
+
 router.post('/photo-grammar', requireAuth, async (req, res) => {
   const { imageBase64, mimeType } = req.body;
   if (!imageBase64 || !mimeType) return res.status(400).json({ error: 'Missing image data' });

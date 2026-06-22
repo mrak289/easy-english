@@ -86,6 +86,37 @@ export async function mockHistoryApi(page, history = []) {
 }
 
 /**
+ * Mock extract-text API (WritingScreen photo OCR)
+ */
+export async function mockExtractTextApi(page, text = 'The story was about a brave knight.') {
+  await page.route('/api/ai/extract-text', route =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ text }),
+    })
+  );
+}
+
+/**
+ * Mock corrections API
+ */
+export async function mockCorrectionsApi(page, override = {}) {
+  await page.route('/api/ai/corrections', route =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        correctedText: override.correctedText || 'The story was about a brave knight.',
+        errors: override.errors ?? [
+          { original: 'storey', corrected: 'story', explanation: 'Spelling error.' },
+        ],
+      }),
+    })
+  );
+}
+
+/**
  * Mock Photo Grammar API
  */
 export async function mockPhotoGrammarApi(page, override = {}) {

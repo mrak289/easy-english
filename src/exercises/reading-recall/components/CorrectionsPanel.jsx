@@ -4,10 +4,8 @@ import { useLanguage } from '../../../contexts/LanguageContext';
 function highlightErrors(text, errors) {
   if (!errors || errors.length === 0) return [{ type: 'text', value: text }];
 
-  // Sort errors by position in text
   const parts = [];
   let remaining = text;
-  let offset = 0;
 
   const sorted = [...errors].sort((a, b) => {
     const ia = text.toLowerCase().indexOf(a.original.toLowerCase());
@@ -26,10 +24,10 @@ function highlightErrors(text, errors) {
   return parts;
 }
 
-export default function CorrectionsPanel({ userRecall }) {
+export default function CorrectionsPanel({ userRecall, initialData = null, onCorrectionsLoaded }) {
   const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
-  const [data, setData] = useState(null);
+  const [data, setData] = useState(initialData);
   const [error, setError] = useState(null);
   const [activeError, setActiveError] = useState(null);
 
@@ -46,6 +44,7 @@ export default function CorrectionsPanel({ userRecall }) {
       if (res.ok) {
         const json = await res.json();
         setData(json);
+        onCorrectionsLoaded?.(json);
       } else {
         setError(t.aiConnectError);
       }

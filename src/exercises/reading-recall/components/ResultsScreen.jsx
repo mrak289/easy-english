@@ -100,7 +100,19 @@ export default function ResultsScreen({ text, userRecall, onRetry, onBackToCatal
           </div>
 
           {/* Grammar Corrections */}
-          <CorrectionsPanel userRecall={userRecall} />
+          <CorrectionsPanel
+            userRecall={userRecall}
+            onCorrectionsLoaded={(corrections) => {
+              if (sessionIdRef.current) {
+                fetch(`/api/history/${sessionIdRef.current}`, {
+                  method: 'PATCH',
+                  headers: { 'Content-Type': 'application/json' },
+                  credentials: 'include',
+                  body: JSON.stringify({ corrections }),
+                }).catch(() => {});
+              }
+            }}
+          />
 
           {/* AI Feedback */}
           <div className="bg-gradient-to-br from-indigo-900 to-slate-900 text-white rounded-2xl p-6 shadow-md relative overflow-hidden">

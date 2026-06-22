@@ -41,6 +41,10 @@ function SessionDetail({ sessionId, onBack }) {
     ? JSON.parse(session.criteria)
     : session.criteria;
 
+  const corrections = session.corrections && typeof session.corrections === 'string'
+    ? JSON.parse(session.corrections)
+    : session.corrections;
+
   return (
     <div className="w-full">
       <div className="max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -68,7 +72,7 @@ function SessionDetail({ sessionId, onBack }) {
           </div>
 
           {/* Grammar corrections */}
-          <CorrectionsPanel userRecall={session.user_recall} />
+          <CorrectionsPanel userRecall={session.user_recall} initialData={corrections} />
 
           {/* Saved AI feedback */}
           {session.ai_feedback ? (
